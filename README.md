@@ -39,17 +39,15 @@ free-tier GPU memory and session-time limits.
 │   ├── 03_part2_transformer_decoder.ipynb # Part 2: Transformer decoder + cross-attention
 │   └── 04_part3_prompt_guided.ipynb       # Part 3: prompt-conditioned captioning
 ├── results/
-│   ├── part1_baseline/
-│   │   ├── hyperparameters.csv
-│   │   ├── test_metrics.json
-│   │   ├── loss_and_bleu_curves.png
-│   │   └── qualitative_samples.png
-│   ├── part2_transformer/
-│   │   └── ...
-│   └── part3_prompt_guided/
-│       └── ...
-└── report/
-    └── final_report.pdf                   # written report (if submitted separately)
+    ├── part1_baseline/
+    │   ├── hyperparameters.csv
+    │   ├── test_metrics.json
+    │   ├── loss_and_bleu_curves.png
+    │   └── qualitative_samples.png
+    ├── part2_transformer/
+    │   └── ...
+    └── part3_prompt_guided/
+       └── ...
 ```
 
 **Only small, text/image artifacts live in `results/`** (metrics JSON/CSV, plots,
