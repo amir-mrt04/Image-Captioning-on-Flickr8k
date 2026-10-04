@@ -114,7 +114,3 @@ Running locally (outside Kaggle) is also possible: set `KAGGLE_USERNAME` /
 See `requirements.txt`. Core stack: PyTorch, torchvision, h5py, NLTK (BLEU),
 pandas/numpy, matplotlib, tqdm, Pillow, kagglehub.
 
-## License
-
-Academic coursework project. No specific license is applied; please contact the
-author before reusing substantial parts of the code.
