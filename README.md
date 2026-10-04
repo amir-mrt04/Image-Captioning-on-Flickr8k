@@ -1,30 +1,73 @@
-# Image Captioning on Flickr8k  — CNN Encoder + LSTM / Transformer Decoder
+# Image Captioning on Flickr8k — CNN Encoder + LSTM / Transformer Decoder, with Prompt-Guided Control
 
-Final project for the Neural Networks & Deep Learning course. An image captioning
-pipeline is built in three stages on top of a shared, precomputed feature cache:
+Final project for the Neural Networks & Deep Learning course. A full image
+captioning pipeline is built on top of a single, shared preprocessing/feature
+cache (Flickr8k, ResNet50 frozen features), with four trained models on top of it:
 
-1. **Baseline** — frozen CNN encoder (ResNet50) + LSTM decoder (no spatial attention).
-2. **Transformer decoder** — same frozen CNN features, LSTM replaced by a Transformer
-   decoder with masked self-attention and cross-attention over the image's spatial
-   feature tokens.
-3. **Prompt-guided captioning** — the baseline/Transformer decoder conditioned on an
-   extra prompt embedding, for controllable caption generation.
+1. **Part 1 — Baseline**: frozen ResNet50 + single-layer LSTM decoder (no spatial attention).
+2. **Part 2 — Transformer decoder**: same frozen ResNet50 features, LSTM replaced
+   by a Transformer decoder with masked self-attention and cross-attention over
+   the image's 49 spatial feature tokens.
+3. **Part 3 — Prompt-guided captioning**: the LSTM and the Transformer decoder
+   each extended with a 6-way tag embedding (`<GENERAL>`, `<OBJECTS>`, `<ACTION>`,
+   `<ENVIRONMENT>`, `<SHORT>`, `<DETAILED>`) so caption style/content can be
+   controlled at generation time, warm-started from the Part 1 / Part 2 checkpoints.
 
-All three stages reuse a single preprocessing pipeline, so the CNN is only ever run
-**once** (in step 0) and every downstream notebook trains only a lightweight decoder
-on cached features — the key design choice that keeps every notebook inside Kaggle's
-free-tier GPU memory and session-time limits.
+The CNN encoder is frozen and run **once**, in the preprocessing notebook; every
+other notebook trains only a lightweight decoder on cached features. All five
+notebooks below were executed end-to-end on Kaggle (T4/P100) with no errors.
 
 ## Results
 
-| Model | Encoder | Decoder | BLEU-1 | BLEU-4 | Notes |
-|---|---|---|---|---|---|
-| Part 1 — Baseline | ResNet50 (frozen) | 1-layer LSTM, no attention | 0.598 | 0.197 | Show-and-Tell style |
-| Part 2 — Transformer | ResNet50 (frozen) | Transformer decoder, cross-attention | *TBD* | *TBD* | see `notebooks/03_...` |
-| Part 3 — Prompt-guided | ResNet50 (frozen) | Decoder + prompt conditioning | *TBD* | *TBD* | see `notebooks/04_...` |
+All metrics are **test-set** BLEU, one generated caption per image compared
+against all available human references for that image.
 
-> Fill in the Part 2 / Part 3 rows once those notebooks finish running on Kaggle, and
-> update this table before the final submission.
+| Model | Decoder | Test BLEU-1 | Test BLEU-4 | Notes |
+|---|---|---|---|---|
+| Part 1 — Baseline | 1-layer LSTM, no attention | **0.598** | **0.1969** | greedy decoding, best epoch 17/23 |
+| Part 2 — Transformer | Cross-attention decoder, greedy | 0.5963 | 0.1942 | best epoch 12/20, slightly below Part 1 |
+| Part 2 — Transformer | Cross-attention decoder, beam-3 | **0.6099** | **0.1985** | secondary decoding analysis; edges past Part 1 |
+| Part 3 — Prompt-guided LSTM | Tag-conditioned LSTM | 0.3661 | 0.0968 | lower BLEU is expected — see discussion below |
+| Part 3 — Prompt-guided Transformer | Tag-conditioned Transformer | 0.3622 | 0.0948 | same tag set, warm-started from Part 2 |
+
+Per-tag breakdown, training curves, and all other raw numbers behind this table
+are in `results/` (see structure below) — they were extracted directly from the
+executed notebooks' saved outputs, not retyped by hand.
+
+### Discussion
+
+- **Part 2 vs Part 1 (fair, greedy comparison):** the Transformer decoder ends
+  up essentially tied with the LSTM baseline on greedy test BLEU-4 (0.1942 vs
+  0.1969 — a 0.003 gap), despite validation BLEU-4 peaking noticeably higher
+  for the Transformer (0.210 vs 0.199). This is consistent with published
+  results on Flickr8k: the dataset is small (~6,500 training images), which is
+  known to make Transformer decoders harder to push past well-tuned LSTM
+  baselines without additional data or regularization tricks ([see tuning notes
+  used for this project](https://github.com/mikkkeldp/transformer-image-captioner)).
+  With **beam search (width 3)**, the Transformer's BLEU-4 (0.1985) does edge
+  past the LSTM's greedy BLEU-4 — reported as a secondary result since Part 1
+  uses greedy decoding for its official number.
+- **Part 3 tag control actually works:** for the `<SHORT>` vs `<DETAILED>` tag
+  pair, the generated caption is longer under `<DETAILED>` than under `<SHORT>`
+  for the **same image** in 86.7% of test images (LSTM) and 94.3% of test images
+  (Transformer) — direct evidence that the prompt/tag conditioning is
+  influencing generation, not being ignored by the model.
+- **Why Part 3's BLEU is lower than Part 1/2:** Part 3's captions are
+  tag-specific (e.g. `<OBJECTS>` captions list only objects, `<SHORT>` captions
+  are deliberately brief), so they diverge from the generic, unconstrained
+  human reference captions used for BLEU scoring. The `<OBJECTS>` tag alone
+  scores much higher (BLEU-4 ~0.41-0.43) than the overall average, showing
+  BLEU here is tag-dependent rather than a sign of a worse model.
+
+### Known issue (cosmetic, does not affect results)
+
+In both Part 3 notebooks, the per-epoch progress `print(...)` uses an
+f-string with doubled braces (`f"...{{epoch+1:02d}}..."`), so the printed
+training log shows the literal template text instead of the numbers. This
+**only affects the printed log** — `history_df` / `training_history.csv` and
+the loss/BLEU curve plots use the underlying variables directly and are
+correct. Worth a one-line fix (`{epoch+1:02d}` instead of `{{epoch+1:02d}}`)
+before the next run.
 
 ## Repository structure
 
@@ -34,81 +77,77 @@ free-tier GPU memory and session-time limits.
 ├── requirements.txt
 ├── .gitignore
 ├── notebooks/
-│   ├── 01_data_preprocessing.ipynb        # downloads data, builds vocab, caches CNN features
-│   ├── 02_part1_baseline_cnn_lstm.ipynb   # Part 1: CNN + LSTM baseline
-│   ├── 03_part2_transformer_decoder.ipynb # Part 2: Transformer decoder + cross-attention
-│   └── 04_part3_prompt_guided.ipynb       # Part 3: prompt-conditioned captioning
-├── results/
+│   ├── 01_data_preprocessing.ipynb          # downloads data, builds vocab, caches ResNet50 features
+│   ├── 02_part1_baseline_cnn_lstm.ipynb     # Part 1: CNN + LSTM baseline
+│   ├── 03_part2_transformer_decoder.ipynb   # Part 2: Transformer decoder + cross-attention
+│   ├── 04_part3_prompt_guided_lstm.ipynb    # Part 3: tag-guided LSTM
+│   └── 05_part3_prompt_guided_transformer.ipynb  # Part 3: tag-guided Transformer
+└── results/                                  # extracted from the executed notebooks above
+    ├── part0_preprocessing/
+    │   ├── manifest.json
+    │   ├── preprocessing_audit.json
+    │   ├── transform_config.json
+    │   └── train_batch_grid_5x5.png
     ├── part1_baseline/
-    │   ├── hyperparameters.csv
+    │   ├── hyperparameters_table.csv
     │   ├── test_metrics.json
-    │   ├── loss_and_bleu_curves.png
-    │   └── qualitative_samples.png
+    │   ├── training_history.csv
+    │   ├── loss_curve.png
+    │   ├── validation_bleu_curve.png
+    │   ├── test_sample_generations.png
+    │   └── failure_cases_for_manual_analysis.png
     ├── part2_transformer/
-    │   └── ...
+    │   ├── hyperparameters_table.csv
+    │   ├── test_metrics.json
+    │   ├── training_history.csv
+    │   ├── loss_curve.png
+    │   ├── validation_bleu_curve.png
+    │   ├── epoch_time_curve.png
+    │   ├── transformer_test_examples.png
+    │   ├── transformer_failure_cases.png
+    │   ├── lstm_vs_transformer_validation_bleu4.png
+    │   ├── lstm_vs_transformer_caption_examples.png
+    │   └── attention_maps/attention_example_{1..4}.png
     └── part3_prompt_guided/
-       └── ...
+        ├── lstm/        (test_metrics.json, per_tag_test_metrics.csv, length_control_by_tag.csv,
+        │                 short_vs_detailed_control_check.json, same_image_different_tags_examples.txt,
+        │                 loss_curve.png, validation_bleu4_curve.png)
+        └── transformer/ (same files as above)
 ```
 
-**Only small, text/image artifacts live in `results/`** (metrics JSON/CSV, plots,
-sample-caption grids). Large, regenerable artifacts are intentionally **not** tracked
-in this repository — see below.
+(`results.zip` in this delivery is this whole folder, zipped — unzip it into `results/` at the repo root.)
 
 ## What is *not* in this repository (and why)
 
-| Artifact | Where it lives instead |
-|---|---|
-| Raw Flickr8k  images | Downloaded automatically by `01_data_preprocessing.ipynb` (Kaggle dataset, `kagglehub`) |
-| `features.h5` (cached CNN features) | Regenerated by notebook 01, or published as a Kaggle Dataset output |
-| Model checkpoints (`*.pt`) | Kept as Kaggle notebook outputs; link them in this README once trained |
-| GloVe vectors | Downloaded/attached on Kaggle only when `USE_GLOVE=True` |
-| `kaggle.json` / API keys | Never committed — set as environment variables or Kaggle secrets |
+| Artifact | Why it's excluded | Where it lives instead |
+|---|---|---|
+| Raw Flickr8k images | Copyright + size | Downloaded by notebook 01 (Kaggle dataset `adityajn105/flickr8k`) |
+| `features.h5` (~149 MB) | Regenerable, large | Kaggle notebook 01 output |
+| Model checkpoints (`*.pt`, tens-to-hundreds of MB each) | GitHub's 100 MB/file limit | Kaggle notebook outputs |
+| Presentation ZIP bundles | Large, duplicates checkpoints | Kaggle notebook outputs |
 
-GitHub is not a good place for multi-gigabyte binary files (100 MB per-file limit,
-and large repos become slow to clone). Keeping the repo to code + small result
-artifacts also makes it easier to review.
+`results/` intentionally keeps only small, inspectable artifacts (metrics,
+tables, plots) extracted from the notebooks' own outputs.
 
 ## How to run
 
-Each notebook is designed to run on **Kaggle Notebooks** (free GPU, T4/P100):
+Run on **Kaggle Notebooks** (free GPU, T4/P100), in this order, attaching each
+previous notebook's published output as input to the next:
 
-1. **`01_data_preprocessing.ipynb`** — run first. It downloads the dataset
-   automatically (no manual "Add Input" required), cleans captions, builds the
-   vocabulary, splits train/val/test, and caches frozen ResNet50 features to a
-   single `features.h5` file. Publish its `/kaggle/working/preprocessed` output as
-   a new Kaggle Dataset when it finishes.
-2. **`02_part1_baseline_cnn_lstm.ipynb`** — attach the dataset published in step 1
-   as input, then run. Trains the LSTM baseline and evaluates BLEU-1/BLEU-4 on the
-   test set. Publish its output folder as a dataset too (needed for the LSTM-vs-
-   Transformer comparison in step 3).
-3. **`03_part2_transformer_decoder.ipynb`** — attach both the step-1 and step-2
-   datasets as input, then run.
-4. **`04_part3_prompt_guided.ipynb`** — attach the step-1 dataset (and step-2/3
-   outputs if it reuses their checkpoints), then run.
-
-Running locally (outside Kaggle) is also possible: set `KAGGLE_USERNAME` /
-`KAGGLE_KEY` environment variables for the automatic dataset download, install
-`requirements.txt`, and point each notebook's config at local folders instead of
-`/kaggle/...` paths.
-
-## Design notes
-
-- **Why cache features instead of running the CNN every epoch?** The CNN encoder
-  is frozen in every part of this project, so running it repeatedly during training
-  would waste GPU time and memory for no benefit. Extracting it once up front keeps
-  every training notebook lightweight enough to comfortably fit Kaggle's ~13-16 GB
-  VRAM and finish well inside a single GPU session.
-- **Why no attention in the Part 1 baseline?** To make Part 2's contribution
-  (cross-attention over image regions) a meaningful, measurable improvement rather
-  than a redundant one.
-- **Small-dataset Transformer tuning.** Flickr8k has only ~6,000 training images,
-  which is small for a Transformer decoder trained from scratch. Decoder depth/width,
-  dropout, label smoothing, and the learning-rate schedule were tuned with this in
-  mind rather than reusing defaults built for large machine-translation corpora.
-
+1. `01_data_preprocessing.ipynb` — attach the `adityajn105/flickr8k` Kaggle
+   dataset via **Add Input** first; the notebook expects it at
+   `/kaggle/input/datasets/adityajn105/flickr8k` (edit `CFG.INPUT_ROOT` if your
+   dataset mounts at a different path).
+2. `02_part1_baseline_cnn_lstm.ipynb` — attach notebook 1's output.
+3. `03_part2_transformer_decoder.ipynb` — attach notebook 1's and notebook 2's output (needed for the LSTM-vs-Transformer comparison).
+4. `04_part3_prompt_guided_lstm.ipynb` — attach notebook 1's and notebook 2's output (warm-starts from the Part 1 checkpoint).
+5. `05_part3_prompt_guided_transformer.ipynb` — attach notebook 1's and notebook 3's output (warm-starts from the Part 2 checkpoint).
 
 ## Requirements
 
 See `requirements.txt`. Core stack: PyTorch, torchvision, h5py, NLTK (BLEU),
-pandas/numpy, matplotlib, tqdm, Pillow, kagglehub.
+pandas/numpy, matplotlib, tqdm, Pillow.
 
+
+Academic coursework project. No specific license is applied; please contact the
+author before reusing substantial parts of the code.
