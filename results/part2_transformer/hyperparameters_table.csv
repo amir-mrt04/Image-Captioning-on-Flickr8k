@@ -1,0 +1,35 @@
+Hyperparameter,Value
+Learning Rate,0.0001
+Batch Size,64
+Epochs Trained,20
+Maximum Epochs,35
+Optimizer,AdamW
+Weight Decay,0.00001
+Gradient Clip Norm,1.0
+Encoder,SAME Part-1 frozen ResNet50 ImageNet-V2
+GloVe Initialization,False
+GloVe Coverage,0.0
+Word Embedding Dimension,300
+Image Features,49 x 2048 spatial ResNet tokens
+Decoder,Standard Transformer Decoder (replaces LSTM only)
+d_model,256
+Heads,8
+Decoder Layers,3
+Feed-Forward Dimension,768
+Dropout,0.2
+Positional Encoding,Learned positional embeddings for caption tokens
+Word Entry Mapping,Embedding -> Linear -> LeakyReLU -> Residual MLP
+Transformer Norm,Post-LayerNorm
+Attention Dropout,0.1
+FF Dropout,0.3
+Warmup Fraction,0.066667
+Self-Attention,Masked Multi-Head Self-Attention
+Cross-Attention,Caption queries -> 49 image tokens
+Vocabulary Size,2659
+Max Caption Length,20
+Generation,Greedy autoregressive decoding
+Best Model Selection,Full Validation BLEU-4
+Test BLEU-1,0.5963
+Test BLEU-4,0.1942
+Beam-3 Test BLEU-1 (secondary),0.6099
+Beam-3 Test BLEU-4 (secondary),0.1985

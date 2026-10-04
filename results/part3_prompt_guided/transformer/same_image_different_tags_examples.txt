@@ -1,0 +1,92 @@
+Qualitative check: the same test image captioned under each of the 6 tags.
+Columns: image | tag | target (one human reference) | generated (model output)
+
+                        image            tag  \
+0   3655964639_21e76383d0.jpg      <GENERAL>   
+1   3655964639_21e76383d0.jpg      <OBJECTS>   
+2   3655964639_21e76383d0.jpg       <ACTION>   
+3   3655964639_21e76383d0.jpg  <ENVIRONMENT>   
+4   3655964639_21e76383d0.jpg        <SHORT>   
+5   3655964639_21e76383d0.jpg     <DETAILED>   
+6   2229179070_dc8ea8582e.jpg      <GENERAL>   
+7   2229179070_dc8ea8582e.jpg      <OBJECTS>   
+8   2229179070_dc8ea8582e.jpg       <ACTION>   
+9   2229179070_dc8ea8582e.jpg        <SHORT>   
+10  2229179070_dc8ea8582e.jpg     <DETAILED>   
+11  1355833561_9c43073eda.jpg      <GENERAL>   
+12  1355833561_9c43073eda.jpg      <OBJECTS>   
+13  1355833561_9c43073eda.jpg       <ACTION>   
+14  1355833561_9c43073eda.jpg  <ENVIRONMENT>   
+15  1355833561_9c43073eda.jpg        <SHORT>   
+16  1355833561_9c43073eda.jpg     <DETAILED>   
+17   590445887_4d4fa43923.jpg      <GENERAL>   
+18   590445887_4d4fa43923.jpg      <OBJECTS>   
+19   590445887_4d4fa43923.jpg       <ACTION>   
+20   590445887_4d4fa43923.jpg        <SHORT>   
+21   590445887_4d4fa43923.jpg     <DETAILED>   
+22  2836360729_6500249fe6.jpg      <GENERAL>   
+23  2836360729_6500249fe6.jpg      <OBJECTS>   
+24  2836360729_6500249fe6.jpg       <ACTION>   
+25  2836360729_6500249fe6.jpg  <ENVIRONMENT>   
+26  2836360729_6500249fe6.jpg        <SHORT>   
+27  2836360729_6500249fe6.jpg     <DETAILED>   
+
+                                               target  \
+0   several people one being a woman in a black dr...   
+1                  a person and a dress and a bicycle   
+2    the woman wearing a red bow walks past a bicycle   
+3   woman in black dress with red accessories is w...   
+4        woman in a black dress walking on the street   
+5   a man chains his bike to a rack while a woman ...   
+6   a trainer runs next to his dog as it jumps thr...   
+7                                  a dog and a person   
+8       a dog is jumping through hoops held by people   
+9               a brown dog jumps through three hoops   
+10  a medium size dog is jumping through hoops whi...   
+11  a man in an orange vest tossing a child into t...   
+12                               a child and a person   
+13           a man throws a small child up in the air   
+14  at a beach a man in an orange vest tosses a yo...   
+15       a child is being thrown in the air playfully   
+16  a man in an orange jacket playfully tosses a s...   
+17  a woman with green hair hula hoops before a crowd   
+18                                           a person   
+19  the girl with green hair and a green glove is ...   
+20            a woman with green hair is hula hooping   
+21  the girl with green hair and a green glove is ...   
+22  the smiling woman at the beach is buried in se...   
+23                                           a person   
+24  the smiling woman at the beach is buried in se...   
+25  a young person is buried in a pile of seaweed ...   
+26         a woman on the beach is covered in seaweed   
+27  a woman is sitting at the beach covered by a l...   
+
+                                            generated  
+0   two people walking on a street in front of a s...  
+1                              a person and a bicycle  
+2   two people are walking on a street in front of...  
+3   a woman in a black coat and black coat walks o...  
+4                      two people walking in a street  
+5   a woman in a black jacket and black jacket is ...  
+6   a woman in a red shirt is playing with a dog i...  
+7                                     a dog and a dog  
+8                 a woman plays with a dog in a <unk>  
+9                    a dog plays with a toy in a park  
+10  a woman in a red shirt is playing with a dog i...  
+11  a man with a red shirt and red shirt stands on...  
+12                              a person and a person  
+13   a man stands on a hill with his arms on his head  
+14  a man in a red shirt and red shirt stands on a...  
+15                          a person stands on a hill  
+16  a man with a red shirt and red shirt stands on...  
+17  a person in a costume is <unk> a red and white...  
+18                               a person and a shirt  
+19  a person in a green shirt is holding a red and...  
+20    a person in a costume is <unk> on a red balloon  
+21  a woman in a pink shirt and a blue shirt is ho...  
+22    a woman in a red jacket is standing in the sand  
+23                                           a person  
+24  a woman is standing in the air with a sled in ...  
+25    a woman in a red jacket is standing in the sand  
+26                    a woman is standing in the sand  
+27    a woman in a red jacket is standing in the sand  
