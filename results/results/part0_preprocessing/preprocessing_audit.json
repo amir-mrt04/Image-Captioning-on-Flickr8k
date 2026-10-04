@@ -1,0 +1,28 @@
+{
+  "raw_caption_rows": 40455,
+  "raw_unique_images": 8091,
+  "exact_duplicate_image_caption_pairs_retained": 10,
+  "missing_caption_rows_removed": 0,
+  "corrupted_images_removed": 0,
+  "final_caption_rows": 40455,
+  "final_unique_images": 8091,
+  "split_caption_counts": {
+    "train": 32360,
+    "val": 4045,
+    "test": 4050
+  },
+  "split_image_counts": {
+    "train": 6472,
+    "val": 809,
+    "test": 810
+  },
+  "vocab_size": 2659,
+  "max_len": 20,
+  "train_truncation_rate": 0.03442521631644005,
+  "oov_rates": {
+    "train": 0.024178628935557916,
+    "val": 0.029141417580172944,
+    "test": 0.03089757811055648
+  },
+  "feature_cache_enabled": true
+}
