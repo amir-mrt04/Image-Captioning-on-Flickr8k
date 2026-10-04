@@ -108,13 +108,6 @@ Running locally (outside Kaggle) is also possible: set `KAGGLE_USERNAME` /
   dropout, label smoothing, and the learning-rate schedule were tuned with this in
   mind rather than reusing defaults built for large machine-translation corpora.
 
-## References
-
-- Vinyals et al., *Show and Tell: A Neural Image Caption Generator* (2015)
-- Xu et al., *Show, Attend and Tell* (2015)
-- Vaswani et al., *Attention Is All You Need* (2017)
-- `mikkkeldp/transformer-image-captioner` — notes on tuning Transformer decoders
-  for low-resource image captioning: https://github.com/mikkkeldp/transformer-image-captioner
 
 ## Requirements
 
