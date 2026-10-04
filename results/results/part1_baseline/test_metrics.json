@@ -1,8 +1,0 @@
-{
-  "best_epoch": 17,
-  "val_bleu4_at_best_epoch": 0.1989,
-  "test_bleu1": 0.598,
-  "test_bleu4": 0.1969,
-  "end_token_generated_pct": 99.01,
-  "reached_decoding_limit_without_end_pct": 0.99
-}
